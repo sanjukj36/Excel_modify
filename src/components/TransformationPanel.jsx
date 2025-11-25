@@ -11,7 +11,8 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
         ...row,
         [selectedColumn]: String(row[selectedColumn] || "")
           .replace(/[()]/g, "")
-          .replace(/[^A-Za-z0-9]+/g, "_")
+          // .replace(/[^A-Za-z0-9]+/g, "_")
+          .replace(/[^\p{L}\p{N}]+/gu, "_")
           .replace(/_+/g, "_")
           .replace(/^_+|_+$/g, ""),
       }));
