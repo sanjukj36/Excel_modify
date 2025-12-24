@@ -4,6 +4,7 @@ import NumericPanel from "./components/NumericPanel";
 import FileOperations from "./components/FileOperations";
 import DataTable from "./components/DataTable";
 import TransformationPanel from "./components/TransformationPanel";
+import JsonShow from "./components/JsonShow";
 
 export default function App() {
   const [data, setData] = useState([]);
@@ -12,6 +13,7 @@ export default function App() {
   const [redoStack, setRedoStack] = useState([]);
   const [selectedColumn, setSelectedColumn] = useState("");
   const [fileName, setFileName] = useState("");
+  const [mode, setMode] = useState(false)
 
   // Helpers to push snapshot to undo stack
   const pushUndoSnapshot = useCallback((snapshot) => {
@@ -74,12 +76,35 @@ export default function App() {
   // derived: available columns
   const availableColumns = useMemo(() => (data.length > 0 ? Object.keys(data[0]) : []), [data]);
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-slate-400 p-4">
       {/* <div className="max-w-7xl mx-auto"> */}
       <div className="max-w-screen mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-1 space-y-6">
+
+          <div className="flex flex-col items-end">
+              <div className="flex items-center space-x-4 mb-2">
+                <span className={`font-medium ${!mode ? 'text-cyan-400' : 'text-gray-400'}`}>Table View</span>
+
+                <button
+                  onClick={() => setMode(!mode)}
+                  className="relative inline-flex h-6 w-10 items-center rounded-full bg-gray-800 border border-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500 shadow-lg"
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-gradient-to-r from-cyan-500 to-teal-400 transition-transform duration-300 ${mode ? 'translate-x-5' : 'translate-x-1'
+                      }`}
+                  />
+                </button>
+
+                <span className={`font-medium ${mode ? 'text-purple-400' : 'text-gray-400'}`}>JSON View</span>
+              </div>
+
+
+            </div>
+
+
             <FileUploader onFileLoad={handleFileLoad} fileName={fileName} />
 
             <TransformationPanel
@@ -105,11 +130,22 @@ export default function App() {
           </div>
 
           <div className="lg:col-span-3">
-            <DataTable
-              data={data}
-              selectedColumn={selectedColumn}
-              setSelectedColumn={setSelectedColumn}
-            />
+
+           
+
+            {mode ?
+              <JsonShow
+                data={data}
+                selectedColumn={selectedColumn}
+                setSelectedColumn={setSelectedColumn}
+              />
+              :
+              <DataTable
+                data={data}
+                selectedColumn={selectedColumn}
+                setSelectedColumn={setSelectedColumn}
+              />
+            }
           </div>
         </div>
       </div>
