@@ -24,7 +24,7 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
     if (!selectedColumn) return alert("Please select a column first!");
     if (!data[0][selectedColumn]) return alert(`No '${selectedColumn}' column!`);
 
-    const mapping = { "1": 1, "10": 0.1, "100": 0.001, "1000": 0.0001 };
+    const mapping = { "1": 1, "10": 0.1, "100": 0.01, "1000": 0.001 };
     performAction((prev) => {
       return prev.map((row) => {
         let v = String(row[selectedColumn] || "").trim();
