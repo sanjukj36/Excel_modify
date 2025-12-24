@@ -35,6 +35,33 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
     });
   }, [data, selectedColumn, performAction]);
 
+  const setRemoveDuplication = useCallback(() => {
+    if (!data.length) return alert("Upload Excel first!");
+    if (!selectedColumn) return alert("Please select a column first!");
+    if (!data[0][selectedColumn]) return alert(`No '${selectedColumn}' column!`);
+  
+    performAction((prev) => {
+      const counter = {};
+  
+      return prev.map((row) => {
+        let value = String(row[selectedColumn] || "").trim();
+  
+        if (!value) return row;
+  
+        if (counter[value] === undefined) {
+          counter[value] = 0;
+          return { ...row, [selectedColumn]: value };
+        }
+  
+        counter[value] += 1;
+        return {
+          ...row,
+          [selectedColumn]: `${value}_${counter[value]}`
+        };
+      });
+    });
+  }, [data, selectedColumn, performAction]);
+  
   return (
     <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
       <h3 className="font-semibold text-gray-800 mb-3">Data Transformation</h3>
@@ -42,6 +69,7 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
         <div className="text-xs text-gray-500 mb-2">Selected: <span className="font-medium text-blue-600">{selectedColumn || "None"}</span></div>
         <button onClick={removeRegex} className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-lg">Give Remove Regex</button>
         <button onClick={setScaleFactor} className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg mt-2">Convert to Scale Factor</button>
+        <button onClick={setRemoveDuplication} className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg mt-2">Remove Duplication</button>
       </div>
     </div>
   );
