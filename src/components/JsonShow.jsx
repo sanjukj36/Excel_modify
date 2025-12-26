@@ -21,13 +21,27 @@ export default React.memo(function JsonShow({ data }) {
     }, {});
   }, [data]);
 
+  // const formattedJson = useMemo(() => {
+  //   try {
+  //     return JSON.stringify(transformedData, null, 2);
+  //   } catch {
+  //     return "Invalid JSON data";
+  //   }
+  // }, [transformedData]);
+
   const formattedJson = useMemo(() => {
     try {
-      return JSON.stringify(transformedData, null, 2);
+      const entries = Object.entries(transformedData).map(
+        ([key, value]) =>
+          `  "${key}": ${JSON.stringify(value)}`
+      );
+  
+      return `{\n${entries.join(",\n")}\n}`;
     } catch {
       return "Invalid JSON data";
     }
   }, [transformedData]);
+  
 
   // ✅ Copy JSON
   const handleCopy = async () => {
@@ -122,3 +136,6 @@ export default React.memo(function JsonShow({ data }) {
     </div>
   );
 });
+
+
+

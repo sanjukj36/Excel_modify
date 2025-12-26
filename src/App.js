@@ -91,7 +91,7 @@ export default function App() {
                 <button
                   onClick={() => setMode(!mode)}
                   className={`relative inline-flex h-6 w-10 items-center rounded-full bg-gray-800 border border-gray-700 
-                  transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 ${mode?  'focus:ring-purple-500 shadow-lg' :'focus:ring-cyan-500 shadow-lg'}`}
+                  transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 ${mode ? 'focus:ring-purple-500 shadow-lg' : 'focus:ring-cyan-500 shadow-lg'}`}
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-gradient-to-r  transition-transform duration-300 ${mode ? 'translate-x-5 from-purple-500 to-gray-400' : 'translate-x-1 from-cyan-500 to-teal-400'
