@@ -82,18 +82,19 @@ export default function App() {
       {/* <div className="max-w-7xl mx-auto"> */}
       <div className="max-w-screen mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-1 space-y-6">
-
-          <div className="flex flex-col items-end">
-              <div className="flex items-center space-x-4 mb-2">
+          <div className="lg:col-span-1 space-y-5">
+            {/* Toggle Button*/}
+            <div className="flex flex-col items-end">
+              <div className="flex items-center space-x-4">
                 <span className={`font-medium ${!mode ? 'text-cyan-400' : 'text-gray-400'}`}>Table View</span>
 
                 <button
                   onClick={() => setMode(!mode)}
-                  className="relative inline-flex h-6 w-10 items-center rounded-full bg-gray-800 border border-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500 shadow-lg"
+                  className={`relative inline-flex h-6 w-10 items-center rounded-full bg-gray-800 border border-gray-700 
+                  transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 ${mode?  'focus:ring-purple-500 shadow-lg' :'focus:ring-cyan-500 shadow-lg'}`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-gradient-to-r from-cyan-500 to-teal-400 transition-transform duration-300 ${mode ? 'translate-x-5' : 'translate-x-1'
+                    className={`inline-block h-4 w-4 transform rounded-full bg-gradient-to-r  transition-transform duration-300 ${mode ? 'translate-x-5 from-purple-500 to-gray-400' : 'translate-x-1 from-cyan-500 to-teal-400'
                       }`}
                   />
                 </button>
@@ -103,7 +104,6 @@ export default function App() {
 
 
             </div>
-
 
             <FileUploader onFileLoad={handleFileLoad} fileName={fileName} />
 
@@ -131,7 +131,7 @@ export default function App() {
 
           <div className="lg:col-span-3">
 
-           
+
 
             {mode ?
               <JsonShow
