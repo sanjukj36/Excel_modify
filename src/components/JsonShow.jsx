@@ -1,47 +1,83 @@
 
 import React, { useMemo, useState } from "react";
 
-export default React.memo(function JsonShow({ data }) {
+export default React.memo(function JsonShow({ data, type }) {
   const [copied, setCopied] = useState(false);
 
   // ✅ Transform input data
+  // const transformedData = useMemo(() => {
+  //   if (!Array.isArray(data)) return {};
+
+  //   return data.reduce((acc, item) => {
+  //     if (!item?.Tags) return acc;
+
+  //     acc[item.Tags] = {
+  //       starting_reg: Number(item.Address),
+  //       type: "int16",
+  //       scale_factor: Number(item["Scale Factors"])
+  //     };
+
+  //     return acc;
+  //   }, {});
+  // }, [data]);
   const transformedData = useMemo(() => {
-    if (!Array.isArray(data)) return {};
+    if (!Array.isArray(data)) return type === "plc" ? {} : [];
 
     return data.reduce((acc, item) => {
       if (!item?.Tags) return acc;
 
-      acc[item.Tags] = {
-        starting_reg: Number(item.Address),
-        type: "int16",
-        scale_factor: Number(item["Scale Factors"])
-      };
+      if (type === "plc") {
+        acc[item.Tags] = {
+          starting_reg: Number(item.Address),
+          type: "int16",
+          scale_factor: Number(item["Scale Factors"])
+        };
+      } else {
+        acc.push(`LAST('${item.Tags}') AS '${item.Tags}'`);
+      }
 
       return acc;
-    }, {});
-  }, [data]);
+    }, type === "plc" ? {} : []);
+  }, [data, type]);
+
+
+
+  const formattedJson = useMemo(() => {
+    if (type === "plc") {
+      try {
+        const entries = Object.entries(transformedData).map(
+          ([key, value]) =>
+            `  "${key}": ${JSON.stringify(value)}`
+        );
+
+        return `{\n${entries.join(",\n")}\n}`;
+      } catch {
+        return "Invalid JSON data";
+      }
+
+
+    } else {
+      try {
+        return JSON.stringify(transformedData, null, 2);
+      } catch {
+        return "Invalid JSON data";
+      }
+    }
+  }, [transformedData]);
 
   // const formattedJson = useMemo(() => {
   //   try {
-  //     return JSON.stringify(transformedData, null, 2);
+  //     const entries = Object.entries(transformedData).map(
+  //       ([key, value]) =>
+  //         `  "${key}": ${JSON.stringify(value)}`
+  //     );
+
+  //     return `{\n${entries.join(",\n")}\n}`;
   //   } catch {
   //     return "Invalid JSON data";
   //   }
   // }, [transformedData]);
 
-  const formattedJson = useMemo(() => {
-    try {
-      const entries = Object.entries(transformedData).map(
-        ([key, value]) =>
-          `  "${key}": ${JSON.stringify(value)}`
-      );
-  
-      return `{\n${entries.join(",\n")}\n}`;
-    } catch {
-      return "Invalid JSON data";
-    }
-  }, [transformedData]);
-  
 
   // ✅ Copy JSON
   const handleCopy = async () => {
@@ -102,11 +138,10 @@ export default React.memo(function JsonShow({ data }) {
         <div className="flex gap-2">
           <button
             onClick={handleCopy}
-            className={`px-4 py-2 text-sm rounded-lg border transition ${
-              copied
-                ? "bg-green-100 text-green-700 border-green-200"
-                : "bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200"
-            }`}
+            className={`px-4 py-2 text-sm rounded-lg border transition ${copied
+              ? "bg-green-100 text-green-700 border-green-200"
+              : "bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200"
+              }`}
           >
             {copied ? "Copied!" : "Copy JSON"}
           </button>

@@ -6,6 +6,17 @@ import DataTable from "./components/DataTable";
 import TransformationPanel from "./components/TransformationPanel";
 import JsonShow from "./components/JsonShow";
 
+// instead of: const [mode, setMode] = useState(false)
+
+const VIEW_MODES = {
+  TABLE: "table",
+  PUBLISHER: "publisher",
+  PLC: "plc",
+};
+
+
+
+
 export default function App() {
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
@@ -14,6 +25,8 @@ export default function App() {
   const [selectedColumn, setSelectedColumn] = useState("");
   const [fileName, setFileName] = useState("");
   const [mode, setMode] = useState(false)
+  const [viewMode, setViewMode] = useState(VIEW_MODES.TABLE);
+
 
   // Helpers to push snapshot to undo stack
   const pushUndoSnapshot = useCallback((snapshot) => {
@@ -84,7 +97,30 @@ export default function App() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-1 space-y-2">
             {/* Toggle Button*/}
-            <div className="flex flex-col items-end">
+            {/* View Mode Toggle */}
+            <div className="flex justify-end">
+              <div className="inline-flex rounded-lg border border-gray-700 bg-gray-900 p-1">
+                {Object.values(VIEW_MODES).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`px-4 py-1.5 text-sm rounded-md transition-all
+          ${viewMode === mode
+                        ? "bg-gradient-to-r from-cyan-500 to-teal-400 text-black shadow"
+                        : "text-gray-400 hover:text-white"
+                      }`}
+                  >
+                    {mode === "table" && "Table"}
+                    {mode === "publisher" && "Publisher.json"}
+                    {mode === "plc" && "PLC.json"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+
+
+            {/* <div className="flex flex-col items-end">
               <div className="flex items-center space-x-4">
                 <span className={`font-medium ${!mode ? 'text-cyan-400' : 'text-gray-400'}`}>Table View</span>
 
@@ -103,7 +139,7 @@ export default function App() {
               </div>
 
 
-            </div>
+            </div> */}
 
             <FileUploader onFileLoad={handleFileLoad} fileName={fileName} />
 
@@ -131,9 +167,33 @@ export default function App() {
 
           <div className="lg:col-span-3">
 
+            {viewMode === VIEW_MODES.TABLE && (
+              <DataTable
+                data={data}
+                selectedColumn={selectedColumn}
+                setSelectedColumn={setSelectedColumn}
+              />
+            )}
 
+            {viewMode === VIEW_MODES.PUBLISHER && (
+              <JsonShow
+                data={data}
+                selectedColumn={selectedColumn}
+                setSelectedColumn={setSelectedColumn}
+                type="publisher"
+              />
+            )}
 
-            {mode ?
+            {viewMode === VIEW_MODES.PLC && (
+              <JsonShow
+                data={data}
+                selectedColumn={selectedColumn}
+                setSelectedColumn={setSelectedColumn}
+                type="plc"
+              />
+            )}
+
+            {/* {mode ?
               <JsonShow
                 data={data}
                 selectedColumn={selectedColumn}
@@ -145,7 +205,7 @@ export default function App() {
                 selectedColumn={selectedColumn}
                 setSelectedColumn={setSelectedColumn}
               />
-            }
+            } */}
           </div>
         </div>
       </div>
