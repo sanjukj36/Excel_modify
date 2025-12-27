@@ -38,6 +38,141 @@ export default React.memo(function FileOperations({ resetChanges, undoLastAction
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, "output.csv");
   }, [data]);
+  return (
+    <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
+      <h3 className="font-semibold text-gray-800 mb-3">File Operations</h3>
+  
+      <div className="space-y-4">
+        {/* History controls */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Undo */}
+          <div className="relative">
+            <button
+              onClick={undoLastAction}
+              className="peer w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+                         text-white px-4 py-3 rounded-lg font-medium shadow-sm hover:shadow-md
+                         flex items-center justify-center gap-2 transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M3 10h10a8 8 0 018 8v2M3 10l6-6m-6 6l6 6" />
+              </svg>
+              <span>Undo</span>
+            </button>
+  
+            <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
+                            opacity-0 invisible peer-hover:opacity-100 peer-hover:visible
+                            transition-all duration-200 z-10">
+              <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
+                <p className="font-medium mb-2">Undo Last Action</p>
+                <ul className="space-y-1">
+                  <li>↶ Reverts your last transformation</li>
+                  <li>↺ Works on all applied changes</li>
+                </ul>
+              </div>
+              <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
+            </div>
+          </div>
+  
+          {/* Redo */}
+          <div className="relative">
+            <button
+              onClick={redoLastAction}
+              className="peer w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700
+                         text-white px-4 py-3 rounded-lg font-medium shadow-sm hover:shadow-md
+                         flex items-center justify-center gap-2 transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6-6m6 6l-6 6" />
+              </svg>
+              <span>Redo</span>
+            </button>
+  
+            <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
+                            opacity-0 invisible peer-hover:opacity-100 peer-hover:visible
+                            transition-all duration-200 z-10">
+              <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
+                <p className="font-medium mb-2">Redo Last Undo</p>
+                <ul className="space-y-1">
+                  <li>↷ Restores an undone action</li>
+                  <li>⚠️ Available only after Undo</li>
+                </ul>
+              </div>
+              <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
+            </div>
+          </div>
+        </div>
+  
+        {/* File operations */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Reset */}
+          <div className="relative">
+            <button
+              onClick={resetChanges}
+              className="peer w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700
+                         text-white px-4 py-3 rounded-lg font-medium shadow-sm hover:shadow-md
+                         flex items-center justify-center gap-2 transition-all"
+            >
+              <span>Reset All</span>
+            </button>
+  
+            <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
+                            opacity-0 invisible peer-hover:opacity-100 peer-hover:visible
+                            transition-all duration-200 z-10">
+              <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
+                <p className="font-medium mb-2 text-red-300">
+                  ⚠️ Reset All Changes
+                </p>
+                <ul className="space-y-1">
+                  <li>↺ Reverts to original uploaded data</li>
+                  <li>⌫ Removes all transformations</li>
+                  <li>❌ Cannot be undone</li>
+                </ul>
+              </div>
+              <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
+            </div>
+          </div>
+  
+          {/* Save CSV */}
+          <div className="relative">
+            <button
+              onClick={saveCSV}
+              disabled={!data.length}
+              className="peer w-full bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700
+                         text-white px-4 py-3 rounded-lg font-medium shadow-sm hover:shadow-md
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         flex items-center justify-center gap-2 transition-all"
+            >
+              <span>Save CSV</span>
+            </button>
+  
+            <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
+                            opacity-0 invisible peer-hover:opacity-100 peer-hover:visible
+                            transition-all duration-200 z-10">
+              <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
+                <p className="font-medium mb-2">Export to CSV</p>
+                <ul className="space-y-1">
+                  <li>📥 Downloads output.csv</li>
+                  <li>📊 Includes all transformations</li>
+                  <li>💾 Excel / Sheets compatible</li>
+                </ul>
+                {!data.length && (
+                  <p className="mt-2 text-yellow-300">
+                    ⚠️ Upload data first
+                  </p>
+                )}
+              </div>
+              <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  
+
+
 
   return (
     <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">

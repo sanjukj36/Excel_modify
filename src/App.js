@@ -98,8 +98,8 @@ export default function App() {
           <div className="lg:col-span-1 space-y-2">
             {/* Toggle Button*/}
             {/* View Mode Toggle */}
-            <div className="flex justify-end">
-              <div className="inline-flex rounded-lg border border-gray-700 bg-gray-900 p-1">
+            <div className="w-fill px-2">
+              <div className="inline-flex rounded-lg border border-gray-700 bg-white p-1">
                 {Object.values(VIEW_MODES).map((mode) => (
                   <button
                     key={mode}
@@ -107,7 +107,7 @@ export default function App() {
                     className={`px-4 py-1.5 text-sm rounded-md transition-all
           ${viewMode === mode
                         ? "bg-gradient-to-r from-cyan-500 to-teal-400 text-black shadow"
-                        : "text-gray-400 hover:text-white"
+                        : "text-gray-400 hover:text-gray-600"
                       }`}
                   >
                     {mode === "table" && "Table"}

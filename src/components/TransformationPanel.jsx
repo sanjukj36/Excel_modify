@@ -139,6 +139,118 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
     });
   }, [data, selectedColumn, performAction]);
 
+
+  return (
+    <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
+      <h3 className="font-semibold text-gray-800 mb-3">
+        Data Transformation
+      </h3>
+
+      <div className="text-xs text-gray-500 mb-4">
+        Selected column:{" "}
+        <span className="font-medium text-blue-600">
+          {selectedColumn || "None"}
+        </span>
+        {!selectedColumn && (
+          <span className="text-red-500 ml-2">
+            (Select a column first)
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        {/* Clean Text Formatting */}
+        <div className="relative">
+          <button
+            onClick={removeRegex}
+            className="peer w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg font-medium transition"
+          >
+            Clean Text Formatting
+          </button>
+
+          <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
+                          opacity-0 invisible
+                          peer-hover:opacity-100 peer-hover:visible
+                          transition-all duration-200 z-10">
+            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
+              <p className="font-medium mb-1">What it does:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Removes parentheses</li>
+                <li>Replaces special characters</li>
+                <li>Removes extra underscores</li>
+                <li>Trims underscores</li>
+              </ul>
+              <p className="mt-2 text-gray-300">
+                Example: "Test (123)!" → "Test_123"
+              </p>
+            </div>
+            <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
+          </div>
+        </div>
+
+        {/* Convert Scale Values */}
+        <div className="relative">
+          <button
+            onClick={setScaleFactor}
+            className="peer w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg font-medium transition"
+          >
+            Convert Scale Values
+          </button>
+
+          <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
+                          opacity-0 invisible
+                          peer-hover:opacity-100 peer-hover:visible
+                          transition-all duration-200 z-10">
+            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
+              <p className="font-medium mb-2">
+                Converts scale strings:
+              </p>
+              <ul className="space-y-1">
+                <li>1 → 1</li>
+                <li>10 → 0.1</li>
+                <li>100 → 0.01</li>
+                <li>1000 → 0.001</li>
+              </ul>
+              <p className="mt-2 text-gray-300">
+                Other values remain unchanged
+              </p>
+            </div>
+            <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
+          </div>
+        </div>
+
+        {/* Remove Duplication */}
+        <div className="relative">
+          <button
+            onClick={setRemoveDuplication}
+            className="peer w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg font-medium transition"
+          >
+            Remove Duplication
+          </button>
+
+          <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
+                          opacity-0 invisible
+                          peer-hover:opacity-100 peer-hover:visible
+                          transition-all duration-200 z-10">
+            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
+              <p className="font-medium mb-2">
+                Handles duplicates like:
+              </p>
+              <ul className="space-y-1 font-mono">
+                <li>Apple → Apple</li>
+                <li>Apple → Apple_1</li>
+                <li>Apple → Apple_2</li>
+              </ul>
+              <p className="mt-2 text-gray-300">
+                Empty cells are ignored
+              </p>
+            </div>
+            <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   return (
     <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
       <h3 className="font-semibold text-gray-800 mb-3">Data Transformation</h3>
@@ -147,7 +259,7 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
         {!selectedColumn && <span className="text-red-500 ml-2">(Select a column first)</span>}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 ">
         {/* Button 1: Remove Regex with tooltip */}
         <div className="relative group">
           <button
@@ -242,17 +354,6 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
         </div>
       </div>
 
-      {/* Status indicator */}
-      {/* <div className="mt-6 pt-4 border-t border-gray-200">
-        <div className="flex items-center text-xs text-gray-600">
-          <div className={`w-2 h-2 rounded-full mr-2 ${data.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-          <span>{data.length > 0 ? `Data loaded (${data.length} rows)` : 'No data loaded'}</span>
-        </div>
-        <div className="flex items-center text-xs text-gray-600 mt-1">
-          <div className={`w-2 h-2 rounded-full mr-2 ${selectedColumn ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-          <span>{selectedColumn ? `Column selected: ${selectedColumn}` : 'No column selected'}</span>
-        </div>
-      </div> */}
     </div>
   );
 });
