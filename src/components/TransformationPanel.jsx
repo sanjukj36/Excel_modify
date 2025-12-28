@@ -1,359 +1,128 @@
-// import React, { useCallback } from "react";
-
-// export default React.memo(function TransformationPanel({ data, selectedColumn, setSelectedColumn, performAction }) {
-//   const removeRegex = useCallback(() => {
-//     if (!data.length) return alert("Upload Excel first!");
-//     if (!selectedColumn) return alert("Please select a column first!");
-//     if (!data[0][selectedColumn]) return alert(`No '${selectedColumn}' column!`);
-
-//     performAction((prev) => {
-//       return prev.map((row) => ({
-//         ...row,
-//         [selectedColumn]: String(row[selectedColumn] || "")
-//           .replace(/[()]/g, "")
-//           // .replace(/[^A-Za-z0-9]+/g, "_")
-//           .replace(/[^\p{L}\p{N}]+/gu, "_")
-//           .replace(/_+/g, "_")
-//           .replace(/^_+|_+$/g, ""),
-//       }));
-//     });
-//   }, [data, selectedColumn, performAction]);
-
-//   const setScaleFactor = useCallback(() => {
-//     if (!data.length) return alert("Upload Excel first!");
-//     if (!selectedColumn) return alert("Please select a column first!");
-//     if (!data[0][selectedColumn]) return alert(`No '${selectedColumn}' column!`);
-
-//     const mapping = { "1": 1, "10": 0.1, "100": 0.01, "1000": 0.001 };
-//     performAction((prev) => {
-//       return prev.map((row) => {
-//         let v = String(row[selectedColumn] || "").trim();
-//         if (mapping[v]) return { ...row, [selectedColumn]: mapping[v] };
-//         const n = parseFloat(v);
-//         return { ...row, [selectedColumn]: isNaN(n) ? v : n };
-//       });
-//     });
-//   }, [data, selectedColumn, performAction]);
-
-//   const setRemoveDuplication = useCallback(() => {
-//     if (!data.length) return alert("Upload Excel first!");
-//     if (!selectedColumn) return alert("Please select a column first!");
-//     if (!data[0][selectedColumn]) return alert(`No '${selectedColumn}' column!`);
-
-//     performAction((prev) => {
-//       const counter = {};
-
-//       return prev.map((row) => {
-//         let value = String(row[selectedColumn] || "").trim();
-
-//         if (!value) return row;
-
-//         if (counter[value] === undefined) {
-//           counter[value] = 0;
-//           return { ...row, [selectedColumn]: value };
-//         }
-
-//         counter[value] += 1;
-//         return {
-//           ...row,
-//           [selectedColumn]: `${value}_${counter[value]}`
-//         };
-//       });
-//     });
-//   }, [data, selectedColumn, performAction]);
-
-//   return (
-//     <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
-//       <h3 className="font-semibold text-gray-800 mb-3">Data Transformation</h3>
-//       <div className="space-y-2">
-//         <div className="text-xs text-gray-500 mb-2">Selected: <span className="font-medium text-blue-600">{selectedColumn || "None"}</span></div>
-//         <button onClick={removeRegex} className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-lg">Give Remove Regex</button>
-//         <button onClick={setScaleFactor} className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg mt-2">
-//           Convert to Scale Factor
-//           <span> chnage this  "1": 1, "10": 0.1, "100": 0.01, "1000": 0.001 </span></button>
-//         <button onClick={setRemoveDuplication} className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg mt-2">Remove Duplication</button>
-//       </div>
-//     </div>
-//   );
-// });
 import React, { useCallback } from "react";
+import Tooltip from "./Tooltip";
+import { useToast } from "./ToastContext";
 
 export default React.memo(function TransformationPanel({ data, selectedColumn, setSelectedColumn, performAction }) {
-  const removeRegex = useCallback(() => {
-    if (!data.length) return alert("Upload Excel first!");
-    if (!selectedColumn) return alert("Please select a column first!");
-    if (!data[0][selectedColumn]) return alert(`No '${selectedColumn}' column!`);
+    const { addToast } = useToast();
 
-    performAction((prev) => {
-      return prev.map((row) => ({
-        ...row,
-        [selectedColumn]: String(row[selectedColumn] || "")
-          .replace(/[()]/g, "")
-          .replace(/[^\p{L}\p{N}]+/gu, "_")
-          .replace(/_+/g, "_")
-          .replace(/^_+|_+$/g, ""),
-      }));
-    });
-  }, [data, selectedColumn, performAction]);
+    const removeRegex = useCallback(() => {
+        if (!data.length) return addToast("Upload Excel first!", "error");
+        if (!selectedColumn) return addToast("Please select a column!", "error");
 
-  const setScaleFactor = useCallback(() => {
-    if (!data.length) return alert("Upload Excel first!");
-    if (!selectedColumn) return alert("Please select a column first!");
-    if (!data[0][selectedColumn]) return alert(`No '${selectedColumn}' column!`);
+        performAction((prev) => {
+            return prev.map((row) => ({
+                ...row,
+                [selectedColumn]: String(row[selectedColumn] || "")
+                    .replace(/[()]/g, "")
+                    .replace(/[^\p{L}\p{N}]+/gu, "_")
+                    .replace(/_+/g, "_")
+                    .replace(/^_+|_+$/g, ""),
+            }));
+        });
+        addToast("Cleaned text formatting in " + selectedColumn, "success");
+    }, [data, selectedColumn, performAction, addToast]);
 
-    const mapping = { "1": 1, "10": 0.1, "100": 0.01, "1000": 0.001 };
-    performAction((prev) => {
-      return prev.map((row) => {
-        let v = String(row[selectedColumn] || "").trim();
-        if (mapping[v]) return { ...row, [selectedColumn]: mapping[v] };
-        const n = parseFloat(v);
-        return { ...row, [selectedColumn]: isNaN(n) ? v : n };
-      });
-    });
-  }, [data, selectedColumn, performAction]);
+    const setScaleFactor = useCallback(() => {
+        if (!data.length) return addToast("Upload Excel first!", "error");
+        if (!selectedColumn) return addToast("Please select a column!", "error");
 
-  const setRemoveDuplication = useCallback(() => {
-    if (!data.length) return alert("Upload Excel first!");
-    if (!selectedColumn) return alert("Please select a column first!");
-    if (!data[0][selectedColumn]) return alert(`No '${selectedColumn}' column!`);
+        const mapping = { "1": 1, "10": 0.1, "100": 0.01, "1000": 0.001 };
+        let changed = 0;
 
-    performAction((prev) => {
-      const counter = {};
+        performAction((prev) => {
+            const newData = prev.map((row) => {
+                let v = String(row[selectedColumn] || "").trim();
+                if (mapping[v]) { changed++; return { ...row, [selectedColumn]: mapping[v] }; }
+                const n = parseFloat(v);
+                return { ...row, [selectedColumn]: isNaN(n) ? v : n };
+            });
+            return newData;
+        });
+        addToast(`Scaled values in ${selectedColumn}`, "success");
+    }, [data, selectedColumn, performAction, addToast]);
 
-      return prev.map((row) => {
-        let value = String(row[selectedColumn] || "").trim();
+    const setRemoveDuplication = useCallback(() => {
+        if (!data.length) return addToast("Upload Excel first!", "error");
+        if (!selectedColumn) return addToast("Please select a column!", "error");
 
-        if (!value) return row;
+        performAction((prev) => {
+            const counter = {};
+            return prev.map((row) => {
+                let value = String(row[selectedColumn] || "").trim();
+                if (!value) return row;
+                if (counter[value] === undefined) {
+                    counter[value] = 0;
+                    return { ...row, [selectedColumn]: value };
+                }
+                counter[value] += 1;
+                return { ...row, [selectedColumn]: `${value}_${counter[value]}` };
+            });
+        });
+        addToast("Removed duplicates in " + selectedColumn, "success");
+    }, [data, selectedColumn, performAction, addToast]);
 
-        if (counter[value] === undefined) {
-          counter[value] = 0;
-          return { ...row, [selectedColumn]: value };
-        }
-
-        counter[value] += 1;
-        return {
-          ...row,
-          [selectedColumn]: `${value}_${counter[value]}`
-        };
-      });
-    });
-  }, [data, selectedColumn, performAction]);
-
-
-  return (
-    <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
-      <h3 className="font-semibold text-gray-800 mb-3">
-        Data Transformation
-      </h3>
-
-      <div className="text-xs text-gray-500 mb-4">
-        Selected column:{" "}
-        <span className="font-medium text-blue-600">
-          {selectedColumn || "None"}
-        </span>
-        {!selectedColumn && (
-          <span className="text-red-500 ml-2">
-            (Select a column first)
-          </span>
-        )}
-      </div>
-
-      <div className="space-y-3">
-        {/* Clean Text Formatting */}
-        <div className="relative">
-          <button
-            onClick={removeRegex}
-            className="peer w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg font-medium transition"
-          >
-            Clean Text Formatting
-          </button>
-
-          <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
-                          opacity-0 invisible
-                          peer-hover:opacity-100 peer-hover:visible
-                          transition-all duration-200 z-10">
-            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
-              <p className="font-medium mb-1">What it does:</p>
-              <ul className="list-disc pl-4 space-y-1">
-                <li>Removes parentheses</li>
-                <li>Replaces special characters</li>
-                <li>Removes extra underscores</li>
-                <li>Trims underscores</li>
-              </ul>
-              <p className="mt-2 text-gray-300">
-                Example: "Test (123)!" → "Test_123"
-              </p>
+    return (
+        <div className="bg-slate-50 rounded-lg border border-slate-200 p-3">
+            <div className="mb-2">
+                <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Transform</h3>
+                <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                    Col: <span className="font-medium text-blue-600">{selectedColumn || "-"}</span>
+                </p>
             </div>
-            <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
-          </div>
-        </div>
 
-        {/* Convert Scale Values */}
-        <div className="relative">
-          <button
-            onClick={setScaleFactor}
-            className="peer w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg font-medium transition"
-          >
-            Convert Scale Values
-          </button>
+            <div className="space-y-2">
+                <Tooltip content={
+                    <div>
+                        <p className="font-semibold text-emerald-400 mb-1">Clean Text Formatting</p>
+                        <ul className="list-disc pl-3 text-slate-300 space-y-0.5">
+                            <li>Removes parentheses ( )</li>
+                            <li>Special chars → underscores</li>
+                            <li>Trims extra underscores</li>
+                        </ul>
+                        <p className="mt-1 text-xs opacity-70 italic">Example: "Test (123)!" → "Test_123"</p>
+                    </div>
+                }>
+                    <button onClick={removeRegex} className="w-full bg-white border border-slate-200 hover:border-orange-300 hover:text-orange-600 text-slate-600 px-3 py-1.5 rounded text-xs font-medium shadow-sm transition-all text-left flex items-center justify-between">
+                        <span>Clean Format</span>
+                        <span className="text-[10px] opacity-50">Regex</span>
+                    </button>
+                </Tooltip>
 
-          <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
-                          opacity-0 invisible
-                          peer-hover:opacity-100 peer-hover:visible
-                          transition-all duration-200 z-10">
-            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
-              <p className="font-medium mb-2">
-                Converts scale strings:
-              </p>
-              <ul className="space-y-1">
-                <li>1 → 1</li>
-                <li>10 → 0.1</li>
-                <li>100 → 0.01</li>
-                <li>1000 → 0.001</li>
-              </ul>
-              <p className="mt-2 text-gray-300">
-                Other values remain unchanged
-              </p>
+                <Tooltip content={
+                    <div>
+                        <p className="font-semibold text-blue-400 mb-1">Scale Factor Conversion</p>
+                        <p className="mb-1">Converts specific string keys to numbers:</p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs font-mono text-slate-300">
+                            <span>"1" → 1</span>
+                            <span>"10" → 0.1</span>
+                            <span>"100" → 0.01</span>
+                            <span>"1k" → 0.001</span>
+                        </div>
+                    </div>
+                }>
+                    <button onClick={setScaleFactor} className="w-full bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 text-slate-600 px-3 py-1.5 rounded text-xs font-medium shadow-sm transition-all text-left flex items-center justify-between">
+                        <span>Scale Values</span>
+                        <span className="text-[10px] opacity-50">1→1</span>
+                    </button>
+                </Tooltip>
+
+                <Tooltip content={
+                    <div>
+                        <p className="font-semibold text-purple-400 mb-1">Remove Duplicates</p>
+                        <p>Appends a suffix to duplicate values to make them unique.</p>
+                        <div className="mt-1 text-slate-300 bg-slate-700/50 p-1 rounded">
+                            Apple → Apple<br />
+                            Apple → Apple_1<br />
+                            Apple → Apple_2
+                        </div>
+                    </div>
+                }>
+                    <button onClick={setRemoveDuplication} className="w-full bg-white border border-slate-200 hover:border-purple-300 hover:text-purple-600 text-slate-600 px-3 py-1.5 rounded text-xs font-medium shadow-sm transition-all text-left flex items-center justify-between">
+                        <span>Dedup</span>
+                        <span className="text-[10px] opacity-50">_1,_2</span>
+                    </button>
+                </Tooltip>
             </div>
-            <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
-          </div>
         </div>
-
-        {/* Remove Duplication */}
-        <div className="relative">
-          <button
-            onClick={setRemoveDuplication}
-            className="peer w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg font-medium transition"
-          >
-            Remove Duplication
-          </button>
-
-          <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-full px-2
-                          opacity-0 invisible
-                          peer-hover:opacity-100 peer-hover:visible
-                          transition-all duration-200 z-10">
-            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
-              <p className="font-medium mb-2">
-                Handles duplicates like:
-              </p>
-              <ul className="space-y-1 font-mono">
-                <li>Apple → Apple</li>
-                <li>Apple → Apple_1</li>
-                <li>Apple → Apple_2</li>
-              </ul>
-              <p className="mt-2 text-gray-300">
-                Empty cells are ignored
-              </p>
-            </div>
-            <div className="w-3 h-3 bg-gray-800 rotate-45 absolute -bottom-1 left-6" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-  return (
-    <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
-      <h3 className="font-semibold text-gray-800 mb-3">Data Transformation</h3>
-      <div className="text-xs text-gray-500 mb-4">
-        Selected column: <span className="font-medium text-blue-600">{selectedColumn || "None"}</span>
-        {!selectedColumn && <span className="text-red-500 ml-2">(Select a column first)</span>}
-      </div>
-
-      <div className="space-y-3 ">
-        {/* Button 1: Remove Regex with tooltip */}
-        <div className="relative group">
-          <button
-            onClick={removeRegex}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium"
-          >
-            Clean Text Formatting
-          </button>
-          <div className="absolute bottom-full left-0 mb-2 w-full px-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
-              <p className="font-medium mb-1">What it does:</p>
-              <ul className="list-disc pl-4 space-y-1">
-                <li>Removes parentheses ( ) from text</li>
-                <li>Replaces special characters with underscores</li>
-                <li>Removes extra underscores (_)</li>
-                <li>Trims underscores from start/end</li>
-              </ul>
-              <p className="mt-2 text-gray-300">Example: "Test (123)!" becomes "Test_123"</p>
-            </div>
-            <div className="w-3 h-3 bg-gray-800 transform rotate-45 absolute -bottom-1 left-6"></div>
-          </div>
-        </div>
-
-        {/* Button 2: Scale Factor with tooltip */}
-        <div className="relative group">
-          <button
-            onClick={setScaleFactor}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium"
-          >
-            Convert Scale Values
-          </button>
-          <div className="absolute bottom-full left-0 mb-2 w-full px-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
-              <p className="font-medium mb-2">Converts string scale factors to decimal numbers:</p>
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <div className="bg-gray-700 p-2 rounded text-center">
-                  <div className="font-bold">1
-                    <span className="text-green-300 ps-1">→ 1</span>
-                  </div>
-                </div>
-                <div className="bg-gray-700 p-2 rounded text-center">
-                  <div className="font-bold">10
-                    <span className="text-green-300 ps-1">→ 0.1</span>
-                  </div>
-                </div>
-                <div className="bg-gray-700 p-2 rounded text-center">
-                  <div className="font-bold">100
-                    <span className="text-green-300 ps-1">→ 0.01</span>
-                  </div>
-                </div>
-                <div className="bg-gray-700 p-2 rounded text-center">
-                  <div className="font-bold">1000
-                    <span className="text-green-300 ps-1">→ 0.001</span>
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-300">Other numeric values remain unchanged</p>
-            </div>
-            <div className="w-3 h-3 bg-gray-800 transform rotate-45 absolute -bottom-1 left-6"></div>
-          </div>
-        </div>
-
-        {/* Button 3: Remove Duplication with tooltip */}
-        <div className="relative group">
-          <button
-            onClick={setRemoveDuplication}
-            className="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium"
-          >
-            Remove Duplication
-          </button>
-          <div className="absolute bottom-full left-0 mb-2 w-full px-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-            <div className="bg-gray-800 text-white text-xs p-3 rounded-lg shadow-lg">
-              <p className="font-medium mb-2">Appends numbers to duplicate values:</p>
-              <div className="space-y-2 mb-2">
-                <div className="flex items-center justify-between bg-gray-700 p-2 rounded">
-                  <span className="font-mono">"Apple"</span>
-                  <span className="text-green-300">→ "Apple" (first occurrence)</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-700 p-2 rounded">
-                  <span className="font-mono">"Apple" (duplicate)</span>
-                  <span className="text-green-300">→ "Apple_1"</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-700 p-2 rounded">
-                  <span className="font-mono">"Apple" (another)</span>
-                  <span className="text-green-300">→ "Apple_2"</span>
-                </div>
-              </div>
-              <p className="text-gray-300">Empty cells are not modified</p>
-            </div>
-            <div className="w-3 h-3 bg-gray-800 transform rotate-45 absolute -bottom-1 left-6"></div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  );
+    );
 });

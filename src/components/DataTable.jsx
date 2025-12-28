@@ -1,58 +1,61 @@
 import React, { useMemo } from "react";
 
 export default React.memo(function DataTable({ data, selectedColumn, setSelectedColumn }) {
-  const rows = data;
+    const rows = data;
+    const columns = useMemo(() => (rows.length > 0 ? Object.keys(rows[0]) : []), [rows]);
 
-  const columns = useMemo(() => (rows.length > 0 ? Object.keys(rows[0]) : []), [rows]);
+    if (!rows || rows.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <svg className="w-16 h-16 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <p className="text-lg font-medium">No Data</p>
+                <p className="text-sm">Upload Excel file</p>
+            </div>
+        );
+    }
 
-  return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 h-[calc(100vh-40px)]">
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex justify-between items-center">
-          <div className="flex gap-1">
-            <p className="text-sm mt-1 text-gray-600">Showing {rows.length} rows</p>
-          </div>
-          <div className="text-sm text-blue-600 font-medium">Selected: {selectedColumn}</div>
+    return (
+        <div className="h-full overflow-auto bg-white shadow-sm border border-slate-200 rounded-lg flex flex-col">
+            <div className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 px-4 py-2 flex justify-between items-center text-xs text-slate-500 shadow-sm">
+                <span>{rows.length} rows</span>
+                <span>Column: <span className="font-medium text-blue-600">{selectedColumn || "None"}</span></span>
+            </div>
+
+            <div className="overflow-auto flex-1">
+                <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
+                    <thead className="bg-slate-50 sticky top-0 z-0 text-xs uppercase font-medium text-slate-500">
+                        <tr>
+                            {columns.map((key) => (
+                                <th
+                                    key={key}
+                                    onClick={() => setSelectedColumn(key)}
+                                    className={`px-4 py-3 text-left border-b border-r border-slate-200 cursor-pointer select-none whitespace-nowrap sticky top-0 bg-slate-50 hover:bg-slate-100 transition-colors
+                    ${key === selectedColumn ? 'text-blue-600 bg-blue-50/50' : ''}`}
+                                >
+                                    {key}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-slate-100 text-sm text-slate-700">
+                        {rows.map((row, i) => (
+                            <tr key={i} className="hover:bg-slate-50 transition-colors">
+                                {columns.map((key) => (
+                                    <td
+                                        key={`${i}-${key}`}
+                                        className={`px-4 py-2 whitespace-nowrap border-b border-slate-50 border-r border-r-slate-50
+                                  ${key === selectedColumn ? 'bg-blue-50/20 font-medium text-slate-900' : ''}`}
+                                    >
+                                        {row[key]}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </div>
-      <div className="overflow-auto max-h-[calc(100vh-100px)]">
-        <table className="min-w-full divide-y divide-gray-200 ">
-          <thead className="bg-gray-50 sticky top-0">
-            <tr>
-              {columns.map((key) => (
-                <th
-                  key={key}
-                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-b cursor-pointer ${key === selectedColumn
-                    ? 'bg-blue-100 text-blue-700 border-blue-200'
-                    : 'text-gray-500'
-                    }`}
-                  onClick={() => setSelectedColumn(key)}
-                >
-                  <div className="flex items-center gap-1">
-                    {key}
-                    {key === selectedColumn && (
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {rows.map((row, i) => (
-              <tr key={i} className="hover:bg-gray-50 transition-colors">
-                {Object.entries(row).map(([key, val]) => (
-                  <td key={key} className={`px-6 py-4 whitespace-nowrap text-sm border-b ${key === selectedColumn ? 'bg-blue-50 text-blue-900 font-medium' : 'text-gray-700'}`}>
-                    {val}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+    );
 });
