@@ -9,12 +9,14 @@ import { ToastProvider } from "./components/ToastContext";
 
 const VIEW_MODES = {
     TABLE: "table",
-    PUBLISHER: "publisher",
+    MODIFIED: "modified",
     PLC: "plc",
+    PUBLISHER: "publisher",
 };
 
 export default function App() {
     const [data, setData] = useState([]);
+    const [modifiedData, setModifiedData] = useState([]); // Store rows changed by operations
     const [originalData, setOriginalData] = useState([]);
     const [undoStack, setUndoStack] = useState([]);
     const [redoStack, setRedoStack] = useState([]);
@@ -30,6 +32,7 @@ export default function App() {
     const handleFileLoad = useCallback((parsedJson, name) => {
         setFileName(name || "");
         setData(parsedJson);
+        setModifiedData([]); // Reset modified data on new file load
         setOriginalData(parsedJson);
         setUndoStack([]);
         setRedoStack([]);
@@ -38,17 +41,22 @@ export default function App() {
         }
     }, []);
 
-    const performAction = useCallback((updater) => {
+    const performAction = useCallback((updater, sideEffectData = null) => {
         setData((prev) => {
             const prevSnapshot = prev;
             const next = updater(prev);
             pushUndoSnapshot(prevSnapshot);
             return next;
         });
+        if (sideEffectData) {
+            setModifiedData(sideEffectData);
+            setViewMode(VIEW_MODES.MODIFIED); // Auto-switch to see changes, optional but helpful
+        }
     }, [pushUndoSnapshot]);
 
     const resetChanges = useCallback(() => {
         setData([...originalData]);
+        setModifiedData([]);
         setUndoStack([]);
         setRedoStack([]);
     }, [originalData]);
@@ -92,12 +100,14 @@ export default function App() {
                             selectedColumn={selectedColumn}
                             setSelectedColumn={setSelectedColumn}
                             performAction={performAction}
+                            isTableMode={viewMode === VIEW_MODES.TABLE}
                         />
 
                         <NumericPanel
                             data={data}
                             selectedColumn={selectedColumn}
                             performAction={performAction}
+                            isTableMode={viewMode === VIEW_MODES.TABLE}
                         />
 
                         <div className="h-px bg-slate-100 mx-2 my-1"></div>
@@ -108,6 +118,7 @@ export default function App() {
                             redoLastAction={redoLastAction}
                             saveData={setData}
                             data={data}
+                            isTableMode={viewMode === VIEW_MODES.TABLE}
                         />
 
                         {/* Bottom padding for safe scrolling */}
@@ -121,21 +132,29 @@ export default function App() {
                     {/* Top Navigation Bar */}
                     <div className="h-16 flex-shrink-0 border-b border-slate-200 bg-white px-6 flex items-center justify-end shadow-sm z-10">
                         <div className="bg-slate-100 p-1 rounded-lg flex">
-                            {Object.values(VIEW_MODES).map((mode) => (
-                                <button
-                                    key={mode}
-                                    onClick={() => setViewMode(mode)}
-                                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all
+                            {Object.values(VIEW_MODES).map((mode) => {
+                                if (mode === "modified" && modifiedData.length === 0) return null;
+                                return (
+                                    <button
+                                        key={mode}
+                                        onClick={() => setViewMode(mode)}
+                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all
                                         ${viewMode === mode
-                                            ? "bg-white text-blue-600 shadow-sm"
-                                            : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-                                        }`}
-                                >
-                                    {mode === "table" && "Table"}
-                                    {mode === "publisher" && "Publisher JSON"}
-                                    {mode === "plc" && "PLC JSON"}
-                                </button>
-                            ))}
+                                                ? "bg-white text-blue-600 shadow-sm"
+                                                : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                                            }`}
+                                    >
+                                        {mode === "table" && "Table"}
+                                        {mode === "modified" && modifiedData.length > 0 && "Modified Items"}
+                                        {mode === "plc" && "PLC JSON"}
+                                        {mode === "publisher" && "Publisher JSON"}
+                                    </button>
+                                );
+                            })}
+                            {/* Ensure we don't show the button if no modified data, but if we are IN the mode, we keep it or switch back? 
+                                Ideally, we just hide the button if length is 0. 
+                                The user's request: "also no needs to show Modeified items table"
+                            */}
                         </div>
                     </div>
 
@@ -165,6 +184,23 @@ export default function App() {
                                 setSelectedColumn={setSelectedColumn}
                                 type="plc"
                             />
+                        )}
+                        {viewMode === VIEW_MODES.MODIFIED && (
+                            <div className="flex flex-col h-full">
+                                <div className="mb-2 px-1 text-xs text-slate-500 font-medium">
+                                    {(() => {
+                                        const originalCount = modifiedData.filter(r => r.__isOriginalDuplicate).length;
+                                        const modifiedCount = modifiedData.length - originalCount;
+                                        return `Showing ${modifiedData.length} items (${modifiedCount} modified, ${originalCount} original source)`;
+                                    })()}
+                                </div>
+                                <DataTable
+                                    data={modifiedData}
+                                    selectedColumn={selectedColumn}
+                                    setSelectedColumn={setSelectedColumn}
+                                    enableSelection={false}
+                                />
+                            </div>
                         )}
                     </div>
                 </div>

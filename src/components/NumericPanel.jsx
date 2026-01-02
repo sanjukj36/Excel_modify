@@ -2,12 +2,13 @@ import React, { useState, useCallback } from "react";
 import Tooltip from "./Tooltip";
 import { useToast } from "./ToastContext";
 
-export default React.memo(function NumericPanel({ data, selectedColumn, performAction }) {
+export default React.memo(function NumericPanel({ data, selectedColumn, performAction, isTableMode }) {
     const [deltaLocal, setDeltaLocal] = useState("");
     const isTagsColumn = selectedColumn === "Tags";
     const { addToast } = useToast();
 
     const modifyRegister = useCallback((sign) => {
+        if (!isTableMode) return addToast("Switch to 'Table' view to edit data", "warning");
         if (selectedColumn === "Tags") return addToast("Modification disabled for 'Tags' column", "warning");
         if (!data.length) return addToast("Upload Excel first!", "error");
         if (!selectedColumn) return addToast("Select a column to modify", "error");
@@ -23,10 +24,10 @@ export default React.memo(function NumericPanel({ data, selectedColumn, performA
             })
         );
         addToast(`Success: ${sign > 0 ? 'Added' : 'Subtracted'} ${val} from ${selectedColumn}`, "success");
-    }, [data, selectedColumn, deltaLocal, performAction, addToast]);
+    }, [data, selectedColumn, deltaLocal, performAction, addToast, isTableMode]);
 
     return (
-        <div className="bg-slate-50 rounded-lg border border-slate-200 p-3">
+        <div className={`bg-slate-50 rounded-lg border border-slate-200 p-3 ${!isTableMode ? 'opacity-60 pointer-events-none' : ''}`}>
             <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Math Ops</h3>
 
             {isTagsColumn ? (
@@ -36,32 +37,33 @@ export default React.memo(function NumericPanel({ data, selectedColumn, performA
                     </div>
                 </Tooltip>
             ) : (
-                <Tooltip content="Enter the value to add or subtract from all numbers in the selected column.">
+                <Tooltip content={!isTableMode ? "Switch to Table view to use this tool" : "Enter the value to add or subtract from all numbers in the selected column."}>
                     <input
                         type="number"
                         value={deltaLocal}
                         onChange={(e) => setDeltaLocal(e.target.value)}
                         placeholder="Δ Value"
-                        className="w-full text-xs border border-slate-300 rounded px-2 py-1.5 mb-2 focus:ring-1 focus:ring-blue-500 outline-none"
+                        disabled={!isTableMode}
+                        className="w-full text-xs border border-slate-300 rounded px-2 py-1.5 mb-2 focus:ring-1 focus:ring-blue-500 outline-none disabled:bg-slate-100"
                     />
                 </Tooltip>
             )}
 
             <div className="grid grid-cols-2 gap-2">
-                <Tooltip content="Add the entered value to every number in this column.">
+                <Tooltip content={!isTableMode ? "Switch to Table view to use this tool" : "Add the entered value to every number in this column."}>
                     <button
                         onClick={() => modifyRegister(+1)}
-                        disabled={isTagsColumn || !deltaLocal}
+                        disabled={isTagsColumn || !deltaLocal || !isTableMode}
                         className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50 w-full"
                     >
                         + Add
                     </button>
                 </Tooltip>
 
-                <Tooltip content="Subtract the entered value from every number in this column.">
+                <Tooltip content={!isTableMode ? "Switch to Table view to use this tool" : "Subtract the entered value from every number in this column."}>
                     <button
                         onClick={() => modifyRegister(-1)}
-                        disabled={isTagsColumn || !deltaLocal}
+                        disabled={isTagsColumn || !deltaLocal || !isTableMode}
                         className="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50 w-full"
                     >
                         - Sub
