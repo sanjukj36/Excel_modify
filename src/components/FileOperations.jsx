@@ -11,7 +11,8 @@ export default React.memo(function FileOperations({ resetChanges, undoLastAction
         if (!data.length) return addToast("Nothing to save!", "error");
         try {
             const csv = Papa.unparse(data);
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const csvWithBOM = "\uFEFF" + csv;
+            const blob = new Blob([csvWithBOM], { type: "text/csv;charset=utf-8;" });
             saveAs(blob, "output.csv");
             addToast("File downloaded successfully", "success");
         } catch (e) {
