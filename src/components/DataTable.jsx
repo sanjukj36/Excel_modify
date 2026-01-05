@@ -82,9 +82,12 @@ export default React.memo(function DataTable({
     selectedColumn,
     setSelectedColumn,
     enableSelection = true,
-    setData
+    setData,
+    performAction
 }) {
     const rows = data || [];
+    const [editingColumn, setEditingColumn] = React.useState(null);
+    const [tempName, setTempName] = React.useState("");
 
     const columns = useMemo(() => {
         return rows.length > 0
@@ -96,18 +99,41 @@ export default React.memo(function DataTable({
     const renameColumn = useCallback((oldKey, newKey) => {
         if (!oldKey || !newKey || oldKey === newKey) return;
 
-        setData(prev =>
-            prev.map(row => {
-                if (!(oldKey in row)) return row;
+        if (performAction) {
+            performAction((prev) =>
+                prev.map((row) => {
+                    if (!(oldKey in row)) return row;
+                    const { [oldKey]: value, ...rest } = row;
+                    return { ...rest, [newKey]: value };
+                })
+            );
+        } else {
+            // Fallback if performAction is missing (though it shouldn't be)
+            setData(prev =>
+                prev.map(row => {
+                    if (!(oldKey in row)) return row;
+                    const { [oldKey]: value, ...rest } = row;
+                    return {
+                        ...rest,
+                        [newKey]: value
+                    };
+                })
+            );
+        }
+        setSelectedColumn(newKey);
+    }, [performAction, setData, setSelectedColumn]);
 
-                const { [oldKey]: value, ...rest } = row;
-                return {
-                    ...rest,
-                    [newKey]: value
-                };
-            })
-        );
-    }, [setData]);
+    const startEditing = (key) => {
+        setEditingColumn(key);
+        setTempName(key);
+    };
+
+    const saveColumnName = () => {
+        if (editingColumn && tempName && tempName !== editingColumn) {
+            renameColumn(editingColumn, tempName);
+        }
+        setEditingColumn(null);
+    };
 
     if (!rows.length) {
         return (
@@ -133,32 +159,47 @@ export default React.memo(function DataTable({
                                 ${enableSelection ? "cursor-pointer hover:bg-slate-100" : ""}
                                 ${key === selectedColumn ? "bg-blue-50 text-blue-600" : ""}`}
                             >
-                                {/* 🔤 Header content */}
-                                <div className="flex items-center gap-2">
-                                    <span className="font-medium">{key}</span>
-
-                                    {/* 🔽 Inline options ONLY for selected column */}
-                                    {enableSelection && key === selectedColumn && (
-                                        <select
-                                            className="ml-2 border border-slate-300 rounded px-1 py-0.5 text-[10px] bg-white text-slate-700"
-                                            defaultValue=""
-                                            onClick={(e) => e.stopPropagation()}
-                                            onChange={(e) => {
-                                                if (!e.target.value) return;
-                                                renameColumn(key, e.target.value);
-                                                setSelectedColumn(e.target.value);
-                                                e.target.value = "";
+                                {editingColumn === key ? (
+                                    <>
+                                        <input
+                                            autoFocus
+                                            type="text"
+                                            list="column-suggestions"
+                                            value={tempName}
+                                            onChange={(e) => setTempName(e.target.value)}
+                                            onBlur={saveColumnName}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") saveColumnName();
+                                                if (e.key === "Escape") setEditingColumn(null);
                                             }}
-                                        >
-                                            <option value="">"to chnage"</option>
-                                            <option value="Address">Address</option>
-                                            <option value="Tags">Tags</option>
-                                            <option value="Scale Factors">
-                                                Scale Factors
-                                            </option>
-                                        </select>
-                                    )}
-                                </div>
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="ml-2 border border-blue-400 rounded px-1 py-0.5 text-xs text-slate-700 outline-none w-32"
+                                        />
+                                        <datalist id="column-suggestions">
+                                            <option value="Address" />
+                                            <option value="Tags" />
+                                            <option value="Scale Factors" />
+                                        </datalist>
+                                    </>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium">{key}</span>
+                                        {enableSelection && key === selectedColumn && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    startEditing(key);
+                                                }}
+                                                className="ml-1 text-slate-400 hover:text-blue-600 p-1 rounded hover:bg-slate-100 transition-colors"
+                                                title="Rename Column"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
                             </th>
                         ))}
                     </tr>
@@ -169,8 +210,8 @@ export default React.memo(function DataTable({
                         <tr
                             key={i}
                             className={`hover:bg-slate-50 ${row.__isOriginalDuplicate
-                                    ? "bg-red-50 text-red-600"
-                                    : ""
+                                ? "bg-red-50 text-red-600"
+                                : ""
                                 }`}
                         >
                             {columns.map((key, colIndex) => (
