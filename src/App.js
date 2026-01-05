@@ -165,6 +165,7 @@ export default function App() {
                                 data={data}
                                 selectedColumn={selectedColumn}
                                 setSelectedColumn={setSelectedColumn}
+                                setData={setData}
                             />
                         )}
 
