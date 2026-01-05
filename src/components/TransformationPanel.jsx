@@ -14,7 +14,8 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
             return prev.map((row) => ({
                 ...row,
                 [selectedColumn]: String(row[selectedColumn] || "")
-                    .replace(/[()]/g, "")
+                    .replace(/[²³¹⁰⁴⁵⁶⁷⁸⁹]/g, "")
+                    .replace(/[()[\]]/g, "")
                     .replace(/[^\p{L}\p{N}]+/gu, "_")
                     .replace(/_+/g, "_")
                     .replace(/^_+|_+$/g, ""),
@@ -124,6 +125,8 @@ export default React.memo(function TransformationPanel({ data, selectedColumn, s
                                 <li>Removes parentheses ( )</li>
                                 <li>Special chars → underscores</li>
                                 <li>Trims extra underscores</li>
+                                <li>Removes unit superscripts (², ³, etc.)</li>
+
                             </ul>
                             <p className="mt-1 text-xs opacity-70 italic">Example: "Test (123)!" → "Test_123"</p>
                         </div>
