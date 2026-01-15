@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { Menu, X } from "lucide-react";
 import FileUploader from "./components/FileUploader";
 import NumericPanel from "./components/NumericPanel";
 import FileOperations from "./components/FileOperations";
@@ -23,6 +24,7 @@ export default function App() {
     const [selectedColumn, setSelectedColumn] = useState("");
     const [fileName, setFileName] = useState("");
     const [viewMode, setViewMode] = useState(VIEW_MODES.TABLE);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const pushUndoSnapshot = useCallback((snapshot) => {
         setUndoStack((prev) => [...prev, snapshot]);
@@ -85,9 +87,32 @@ export default function App() {
 
     return (
         <ToastProvider>
-            <div className="flex h-screen w-full bg-slate-50 overflow-hidden text-slate-900 font-inter">
-                {/* LEFT SIDEBAR - Fixed width, independently scrollable */}
-                <div className="w-80 flex-shrink-0 border-r border-slate-200 bg-white flex flex-col h-full shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] z-20">
+            <div className="flex h-screen w-full bg-slate-50 overflow-hidden text-slate-900 font-inter relative">
+
+                {/* Mobile Overlay */}
+                {isSidebarOpen && (
+                    <div
+                        className="fixed inset-0 bg-black/50 z-20 md:hidden backdrop-blur-sm transition-opacity"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
+                {/* LEFT SIDEBAR - Responsive Drawer */}
+                <div className={`
+                    fixed inset-y-0 left-0 z-30 w-80 bg-white flex flex-col h-full border-r border-slate-200 shadow-2xl transition-transform duration-300 ease-in-out
+                    md:relative md:translate-x-0 md:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]
+                    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+                `}>
+
+                    {/* Mobile Close Button */}
+                    <div className="md:hidden flex justify-end p-2 border-b border-slate-100">
+                        <button
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
 
                     {/* Sidebar Content - Scrollable */}
                     <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
@@ -127,18 +152,27 @@ export default function App() {
                 </div>
 
                 {/* RIGHT MAIN CONTENT - Flex grow, handles its own views */}
-                <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
+                <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 w-full">
 
                     {/* Top Navigation Bar */}
-                    <div className="h-16 flex-shrink-0 border-b border-slate-200 bg-white px-6 flex items-center justify-end shadow-sm z-10">
-                        <div className="bg-slate-100 p-1 rounded-lg flex">
+                    <div className="h-16 flex-shrink-0 border-b border-slate-200 bg-white px-4 md:px-6 flex items-center justify-between md:justify-end shadow-sm z-10 gap-4">
+
+                        {/* Mobile Menu Button */}
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="md:hidden p-2 -ml-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
+                        >
+                            <Menu className="w-6 h-6" />
+                        </button>
+
+                        <div className="bg-slate-100 p-1 rounded-lg flex overflow-x-auto no-scrollbar max-w-full">
                             {Object.values(VIEW_MODES).map((mode) => {
                                 if (mode === "modified" && modifiedData.length === 0) return null;
                                 return (
                                     <button
                                         key={mode}
                                         onClick={() => setViewMode(mode)}
-                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all
+                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all whitespace-nowrap
                                         ${viewMode === mode
                                                 ? "bg-white text-blue-600 shadow-sm"
                                                 : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
@@ -151,15 +185,11 @@ export default function App() {
                                     </button>
                                 );
                             })}
-                            {/* Ensure we don't show the button if no modified data, but if we are IN the mode, we keep it or switch back? 
-                                Ideally, we just hide the button if length is 0. 
-                                The user's request: "also no needs to show Modeified items table"
-                            */}
                         </div>
                     </div>
 
                     {/* Viewport content */}
-                    <div className="flex-1 overflow-hidden p-4 relative">
+                    <div className="flex-1 overflow-hidden p-2 md:p-4 relative">
                         {viewMode === VIEW_MODES.TABLE && (
                             <DataTable
                                 data={data}
